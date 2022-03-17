@@ -29,6 +29,9 @@ function RenderCampsite(props) {
 
     const recognizeDrag = ({dx}) => (dx < -200) ? true : false;
 
+    const recognizeComment = ({dx}) => (dx > 200) ? true : false;
+
+
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: () => {
@@ -56,6 +59,9 @@ function RenderCampsite(props) {
                     { cancelable: false }
                 );
             }
+            else if (recognizeComment(gestureState)) {
+                props.onShowModal();
+            }
             return true;
         }
     });
@@ -71,36 +77,36 @@ function RenderCampsite(props) {
                 <Card
                 featuredTitle={campsite.name}
                 image={{uri: baseUrl + campsite.image}}>
-                <Text style={{margin: 10}}>
-                    {campsite.description}
-                </Text>
+                    <Text style={{margin: 10}}>
+                        {campsite.description}
+                    </Text>
 
-                <View style={styles.cardRow}>
-                <Icon
-                    name={props.favorite ? 'heart' : 'heart-o'}
-                    type='font-awesome'
-                    color='#f50'
-                    raised
-                    reverse
-                    onPress={() => props.favorite ? 
-                        console.log('Already set as a favorite') : props.markFavorite()}
-                />
-                <Icon
-                    style={styles.cardItem}
-                    name= 'pencil'
-                    type='font-awesome'
-                    color='#5637DD'
-                    raised
-                    reverse
-                    onPress={() => props.onShowModal()} 
-                />
-                </View>
-            </Card>
-        </Animatable.View>
-        );
+                    <View style={styles.cardRow}>
+                    <Icon
+                        name={props.favorite ? 'heart' : 'heart-o'}
+                        type='font-awesome'
+                        color='#f50'
+                        raised
+                        reverse
+                        onPress={() => props.favorite ? 
+                            console.log('Already set as a favorite') : props.markFavorite()}
+                    />
+                    <Icon
+                        style={styles.cardItem}
+                        name= 'pencil'
+                        type='font-awesome'
+                        color='#5637DD'
+                        raised
+                        reverse
+                        onPress={() => props.onShowModal()} 
+                    />
+                    </View>
+                </Card>
+            </Animatable.View>
+            );
+        }
+        return <View />;
     }
-    return <View />;
-}
 
 function RenderComments({comments}) {
 
@@ -164,66 +170,67 @@ class CampsiteInfo extends Component {
         const comments = this.props.comments.comments.filter(comment => comment.campsiteId === campsiteId);
         return (
             <ScrollView>
-            <RenderCampsite campsite={campsite}
-                    favorite={this.props.favorites.includes(campsiteId)}
-                    markFavorite={() => this.markFavorite(campsiteId)}
-                    onShowModal={() => this.toggleModal()}
-                />
-            <RenderComments comments={comments} />
-            <Modal
-                    animationType={'slide'}
-                    transparent={false}
-                    visible={this.state.showModal}
-                    onRequestClose={() => this.toggleModal()}>
-                    <View style={styles.modal}>
-                        <Rating
-                            showRating
-                            startingValue={this.state.rating}
-                            imageSize={40}
-                            onFinishRating={(rating)=>this.setState({rating: rating})}
-                            style={{paddingVertical: 10}}
-                        />
-                        <Input 
-                            placeholder='Author'
-                            leftIcon={{ type: 'font-awesome', name: 'user-o' }}
-                            leftIconContainerStyle={{ paddingRight: 10 }}
-                            onChangeText={(author)=>this.setState({author: author})}
-                            value={this.state.author}
-                        />
-                        <Input 
-                            placeholder='Comment'
-                            leftIcon={{ type: 'font-awesome', name: 'comment-o' }}
-                            leftIconContainerStyle={{ paddingRight: 10 }}
-                            onChangeText={(comment)=>this.setState({text: comment})}
-                            value={this.state.text}
-                        />
-                        <View>
-                            <Button
-                                onPress={() => {
-                                    this.handleComment(campsiteId);
-                                    this.resetForm();
-                                }}
-                                color='#5637DD'
-                                title='Submit'
-                            />
-                        </View>
-                        <View style={{margin: 10}}>
-                            <Button
-                                onPress={() => {
-                                    this.toggleModal();
-                                    this.resetForm();
-                                }}
-                                color='#808080'
-                                title='Cancel'
-                            />
-                        </View>
-
-                    </View>
-                </Modal>
+              <RenderCampsite
+                campsite={campsite}
+                favorite={this.props.favorites.includes(campsiteId)}
+                markFavorite={() => this.markFavorite(campsiteId)}
+                onShowModal={() => this.toggleModal()}
+              />
+              <RenderComments comments={comments} />
+              <Modal
+                animationType={"slide"}
+                transparent={false}
+                visible={this.state.showModal}
+                onRequestClose={() => this.toggleModal()}
+              >
+                <View style={styles.modal}>
+                  <Rating
+                    showRating
+                    startingValue={this.state.rating}
+                    imageSize={40}
+                    onFinishRating={(rating) => this.setState({ rating: rating })}
+                    style={{ paddingVertical: 10 }}
+                  />
+                  <Input
+                    value={this.state.author}
+                    placeholder="Author"
+                    leftIcon={<Icon name="user-o" type="font-awesome" />}
+                    leftIconContainerStyle={{ paddingRight: 10 }}
+                    onChangeText={(itemValue) => this.setState({ author: itemValue })}
+                  />
+                  <Input
+                    value={this.state.text}
+                    placeholder="Comment"
+                    leftIcon={<Icon name="comment-o" type="font-awesome" />}
+                    leftIconContainerStyle={{ paddingRight: 10 }}
+                    onChangeText={(itemValue) => this.setState({ text: itemValue })}
+                  />
+                  <View style={{ margin: 10 }}>
+                    <Button
+                      title="Submit"
+                      color="#5637DD"
+                      onPress={() => {
+                        this.handleComment(campsiteId);
+                        this.resetForm();
+                      }}
+                    />
+                  </View>
+                  <View style={{ margin: 10 }}>
+                    <Button
+                      onPress={() => {
+                        this.toggleModal();
+                        this.resetForm();
+                      }}
+                      color="#808080"
+                      title="Cancel"
+                    />
+                  </View>
+                </View>
+              </Modal>
             </ScrollView>
-        );
-    }
-}   
+          );
+        }
+}
 
 const styles = StyleSheet.create({
     cardRow: {
