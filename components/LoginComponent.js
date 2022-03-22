@@ -164,18 +164,47 @@ class RegisterTab extends Component {
         }
     }
 
+    getImageFromGallery = async () => {
+        const cameraPermission = await Permissions.askAsync(Permissions.CAMERA);
+        const cameraRollPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    
+        if (cameraPermission.status === 'granted' && cameraRollPermission.status === 'granted') {
+          const capturedImage = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            aspect: [1, 1]
+          });
+          if (!capturedImage.cancelled) {
+            console.log(capturedImage);
+            this.processImage(capturedImage.uri)
+          }
+        }
+      }
+    
+    processImage = async (imgUri) => {
+        const processedImage = await ImageManipulator.manipulateAsync(imgUri, 
+          [{resize: { width: 400} }], SaveFormat.PNG = 'png');
+    
+        console.log(processedImage);
+        this.setState({ imageUrl: processedImage.uri });
+    }
+
     handleRegister() {
         console.log(JSON.stringify(this.state));
         if (this.state.remember) {
-            SecureStore.setItemAsync('userinfo', JSON.stringify(
-                {username: this.state.username, password: this.state.password}))
-                .catch(error => console.log('Could not save user info', error));
+          SecureStore.setItemAsync(
+            'userinfo',
+            JSON.stringify({
+                username: this.state.username,
+                password: this.state.password
+            })
+          ).catch(error => console.log('Could not save user info', error));
         } else {
-            SecureStore.deleteItemAsync('userinfo').catch(
-                error => console.log('Could not delete user info', error)
-            );
+          SecureStore.deleteItemAsync('userinfo').catch(
+            error => console.log('Could not delete user info', error)
+          );
         }
-    }
+      }
+    
 
     render() {
         return (
@@ -186,6 +215,10 @@ class RegisterTab extends Component {
                             source={{uri: this.state.imageUrl}}
                             loadingIndicatorSource={require('./images/logo.png')}
                             style={styles.image}
+                        />
+                        <Button
+                            title='Gallery'
+                            onPress={this.getImageFromGallery}
                         />
                         <Button
                             title='Camera'

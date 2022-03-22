@@ -343,6 +343,13 @@ class Main extends Component {
             : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
     }
 
+    componentDidMount() {
+        this.props.fetchCampsites();
+        this.props.fetchComments();
+        this.props.fetchPromotions();
+        this.props.fetchPartners();
+      }
+
     render() {
         return (
             <View style={{
